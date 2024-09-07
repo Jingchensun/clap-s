@@ -1,0 +1,42 @@
+# TEXT ENCODER CONFIG
+text_model: 'gpt2'
+text_len: 77
+transformer_embed_dim: 768
+freeze_text_encoder_weights: True
+
+# AUDIO ENCODER CONFIG
+audioenc_name: 'HTSAT'
+out_emb: 768
+sampling_rate: 44100
+duration: 7
+fmin: 50
+fmax: 8000 #14000 
+n_fft: 1024 # 1028 
+hop_size: 320
+mel_bins: 64
+window_size: 1024
+
+# PROJECTION SPACE CONFIG 
+d_proj: 1024
+temperature: 0.003
+
+# TRAINING AND EVALUATION CONFIG
+num_classes: 527
+batch_size: 1024
+demo: False
+
+# TRAINING Hyparameters
+num_train_epochs: 3
+weight_decay: 0.01
+learning_rate: 0.01
+lr_scheduler_type: "linear"
+num_warmup_steps: 0
+max_train_steps: num_train_epochs
+
+# Prompt-tuning
+# number of prompt tokens
+n_prompt_tokens: 20
+# If True, soft prompt will be initialized from vocab 
+# Otherwise, you can set `random_range` to initialize by randomization.
+init_from_vocab: True
+# random_range: 0.5

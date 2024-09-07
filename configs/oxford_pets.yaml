@@ -1,0 +1,45 @@
+# ------ root_path/dataset_name ------
+root_path: 'data/'
+
+
+# ------ Load Cache and Features ------
+load_cache: False
+load_pre_feat: False
+
+# load_cache: True
+# load_pre_feat: True
+
+
+# ------ Hyperparamters ------
+search_hp: True
+# search_hp: False
+
+# search_scale: [10, 30] # best for recorded [10, 30]
+search_scale: [10, 10000] # best for gunshot [10, 10000]
+
+# search_scale: [7, 3]
+# search_scale: [12, 5]
+# search_scale: [12, 10]
+# search_scale: [20, 10] # same as 12,10
+
+# search_scale: [10, 10]
+# search_scale: [13, 13] # better than 12,10
+# search_scale: [30, 30] # better than 13, 13
+# search_scale: [50, 50]
+
+
+# search_step: [50, 100]
+search_step: [100, 100]
+
+init_beta: 7
+init_alpha: 25
+
+
+# ------ Basic Config ------
+dataset: 'oxford_pets'
+shots: 16
+backbone: 'RN50'
+
+lr: 0.001
+augment_epoch: 10
+train_epoch: 20
