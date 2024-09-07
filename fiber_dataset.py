@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 import torchaudio
 from collections import defaultdict
+# import random  # 导入random库
 
 # 定义类别字典
 classes = {
@@ -139,6 +140,35 @@ class Fiber(AudioDataset):
 
         self.targets = new_targets
         self.audio_paths = new_audio_paths
+
+    # def _apply_few_shot(self):
+    #     """Apply few-shot sampling to the train set."""
+    #     class_samples = defaultdict(list)
+
+    #     # 将每个类别的样本索引和文件路径分组
+    #     for index in range(len(self.targets)):
+    #         class_samples[self.targets[index]].append((index, self.audio_paths[index]))
+
+    #     new_targets = []
+    #     new_audio_paths = []
+
+    #     # 对每个类别随机采样few-shot样本
+    #     for class_id, samples in class_samples.items():
+    #         # 使用 random.sample 随机选择 shot 个样本
+    #         if len(samples) >= self.shot:
+    #             selected_samples = random.sample(samples, self.shot)  # 随机选择 shot 个样本
+    #         else:
+    #             selected_samples = samples  # 如果样本数少于 shot，就使用所有样本
+
+    #         # 将选定的样本添加到新的列表中
+    #         for index, file_path in selected_samples:
+    #             new_targets.append(class_id)
+    #             new_audio_paths.append(file_path)
+
+    #     # 更新 self.targets 和 self.audio_paths
+    #     self.targets = new_targets
+    #     self.audio_paths = new_audio_paths
+
 
     def _save_to_json(self):
         """Save the dataset information to a JSON file."""

@@ -373,3 +373,5 @@ checkpoints-all/
 4-multi-task/
 cache_dir/
 check-recorded-few-shot-support/
+check-gunshot-few-shot/
+log-recorded-fullshot/

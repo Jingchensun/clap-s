@@ -24,8 +24,8 @@ python audio-tip-adapter.py \
     --audio_dataset "$audio_dir" \
     --model_version 2023 \
     --use_cuda True \
-    --seed '1' \
-    --shot '-1' \
+    --seed '3' \
+    --shot '1' \
     --save_path 'check-recorded-few-shot-support/' \
     # --checkpoint_path '/home/onsi/jsun/clap/2-check-gunshot-all/check-gounshot-1shot/fiber_gunshot-resampled_best_acc.pth'\
     # --eval True

@@ -19,3 +19,87 @@
 
 **** Zero-shot CLIP's test accuracy: 0.17. ****
 **** Tip-Adapter's test accuracy: 0.48. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.48. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.77. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.76. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.80. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.80. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.46. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.17. ****
+**** Tip-Adapter's test accuracy: 0.81. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.16. ****
+**** Tip-Adapter's test accuracy: 0.80. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.15. ****
+**** Tip-Adapter's test accuracy: 0.78. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.15. ****
+**** Tip-Adapter's test accuracy: 0.50. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.15. ****
+**** Tip-Adapter's test accuracy: 0.40. ****
+
+-------- Searching hyperparameters on the val set. --------
+
+-------- Evaluating on the test set. --------
+
+**** Zero-shot CLIP's test accuracy: 0.15. ****
+**** Tip-Adapter's test accuracy: 0.43. ****

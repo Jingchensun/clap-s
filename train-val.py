@@ -79,19 +79,18 @@ def evaluate(clap_model, model, dataloader, text_embeddings, device, class_names
 
     return overall_acc, per_class_acc
 
-def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, epochs, save_path, seed, checkpoint_path=None, eval=False):
+def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, epochs, save_path, shot, seed, checkpoint_path=None, eval=False):
     set_seed(seed)
     
-    train_set = ESC50(root=root_path,  subset='train', audio_dataset=audio_dataset, shot=-1)
-    val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
-    test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
+    # train_set = ESC50(root=root_path,  subset='train', audio_dataset=audio_dataset, shot=-1)
+    # val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
+    # test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
 
-    # data_path = '/home/onsi/jsun/dataset/lbi_gunshot/'
-    # train_set = Fiber(root=data_path, subset='train', audio_dataset=audio_dataset, shot=-1)
-    # val_set = Fiber(root=data_path, subset='val', audio_dataset=audio_dataset)
-    # test_set = Fiber(root=data_path, subset='test', audio_dataset=audio_dataset)
+    train_set = Fiber(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+    val_set = Fiber(root=root_path, subset='val', audio_dataset=audio_dataset)
+    test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
 
-    train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
+    train_loader = DataLoader(train_set, batch_size=128, shuffle=True)
     val_loader = DataLoader(val_set, batch_size=64)
     test_loader = DataLoader(test_set, batch_size=64)
 
@@ -135,8 +134,8 @@ def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, ep
         val_acc, _ = evaluate(clap_model, model, val_loader, text_embeddings, device, val_set.classes)
         
         print(f'Epoch {epoch + 1}/{epochs} - Loss: {avg_loss:.4f} - Validation Accuracy: {val_acc:.4f}')
-        with open(log_file, 'a') as f:
-            f.write(f'Epoch {epoch + 1} - Loss: {avg_loss:.4f} - Validation Accuracy: {val_acc:.4f}\n')
+        # with open(log_file, 'a') as f:
+            # f.write(f'Epoch {epoch + 1} - Loss: {avg_loss:.4f} - Validation Accuracy: {val_acc:.4f}\n')
 
         if val_acc > best_acc:
             best_acc = val_acc
@@ -172,6 +171,7 @@ if __name__ == "__main__":
     parser.add_argument('--checkpoint_path', type=str, help='Path to an existing checkpoint for evaluation')
     parser.add_argument('--eval', type=bool, default=False, help='Evaluate the model from a checkpoint')
     parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')
+    parser.add_argument('--shot', type=int, required=True, help='Number of shots for few-shot learning')
 
     args = parser.parse_args()
     main(**vars(args))

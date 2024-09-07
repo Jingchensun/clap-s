@@ -15,7 +15,7 @@ search_hp: True
 # search_hp: False
 
 # search_scale: [10, 30] # best for recorded [10, 30]
-search_scale: [10, 10000] # best for gunshot [10, 10000]
+search_scale: [10000, 10000] # best for gunshot [10, 10000]
 
 # search_scale: [7, 3]
 # search_scale: [12, 5]
