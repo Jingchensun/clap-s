@@ -21,13 +21,13 @@ for audio_dir in $audio_dirs
 do
     for seed in 1 2 3 4 5
     do
-        CUDA_VISIBLE_DEVICES=3 python audio-tip-adapter.py \
+        CUDA_VISIBLE_DEVICES=1 python clap-support.py \
             --root_path /home/jingchen/data/fiber-data/gunsho-only-resample \
             --audio_dataset "$audio_dir" \
             --model_version 2023 \
             --use_cuda True \
             --seed "$seed" \
-            --shot '8' \
+            --shot '4' \
             --save_path 'check-support-treff/' \
             # --checkpoint_path '/home/onsi/jsun/clap/2-check-gunshot-all/check-gounshot-1shot/fiber_gunshot-resampled_best_acc.pth'\
             # --eval True

@@ -483,13 +483,13 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     set_seed(seed)
 
 
-    # train_set = ESC50(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
-    # val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
-    # test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
+    train_set = ESC50(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+    val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
+    test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
 
-    train_set = Fiber(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
-    val_set = Fiber(root=root_path, subset='val', audio_dataset=audio_dataset)
-    test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
+    # train_set = Fiber(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+    # val_set = Fiber(root=root_path, subset='val', audio_dataset=audio_dataset)
+    # test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
 
     train_loader_cache =  DataLoader(train_set, batch_size=64, shuffle=False)
     train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
@@ -522,7 +522,7 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     print("\nLoading visual features and labels from test set.")
     test_features, test_labels = pre_load_features(cfg, "test", clap_model, test_loader, device, audio_dataset)
 
-    # # ------------------------------------------ Tip-Adapter ------------------------------------------
+    # # ------------------------------------------ Tip-Adapter/CLAP-Support ------------------------------------------
     run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file)
 
      # ------------------------------------------ Tip-Adapter-F ------------------------------------------
@@ -531,7 +531,7 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     # model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
     # run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, train_loader, device, model_save_path, log_file)
 
-   # ------------------------------------------ Tip-Adapter ------------------------------------------
+   # ------------------------------------------ CLAP-Support-F ------------------------------------------
     # model = Adapter(1024, 4).to(device)
     # load_path='/home/jingchen/clap-s/check-adapter/'
     # load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
@@ -541,7 +541,7 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     # model.load_state_dict(torch.load(load_save_path, map_location=device))
     # run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file, model)
 
-    #  # ------------------------------------------ Tip-Adapter-FS ------------------------------------------
+    #  # ------------------------------------------  CLAP-Support-F (Trainable SupportSet) ------------------------------------------
     # model = Adapter(1024, 4).to(device)
     # load_path='/home/jingchen/clap-s/check-adapter/'
     # load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
