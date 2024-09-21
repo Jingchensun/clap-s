@@ -82,7 +82,7 @@ def evaluate(clap_model, model, dataloader, text_embeddings, device, class_names
 def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, epochs, save_path, shot, seed, checkpoint_path=None, eval=False):
     set_seed(seed)
     
-    # train_set = ESC50(root=root_path,  subset='train', audio_dataset=audio_dataset, shot=-1)
+    # train_set = ESC50(root=root_path,  subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
     # val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
     # test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
 
@@ -91,8 +91,8 @@ def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, ep
     test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
 
     train_loader = DataLoader(train_set, batch_size=128, shuffle=True)
-    val_loader = DataLoader(val_set, batch_size=64)
-    test_loader = DataLoader(test_set, batch_size=64)
+    val_loader = DataLoader(val_set, batch_size=128)
+    test_loader = DataLoader(test_set, batch_size=128)
 
     prompt = 'this is the sound of '
     y = [prompt + x for x in train_set.classes]
@@ -101,7 +101,7 @@ def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, ep
     clap_model = CLAP(version=model_version, use_cuda=use_cuda)
     text_embeddings = clap_model.get_text_embeddings(y).to(device)
 
-    log_file = f'log-recorded-fullshot/{os.path.splitext(os.path.basename(audio_dataset))[0]}.txt'
+    log_file = os.path.join(f'log-adpter', f'{shot}shot', f'{audio_dataset}_seed{seed}.txt')
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
     model = Adapter(1024, 4).to(device)
@@ -139,9 +139,9 @@ def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, ep
 
         if val_acc > best_acc:
             best_acc = val_acc
-            save_dir = os.path.dirname(save_path)
+            save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
             os.makedirs(save_dir, exist_ok=True)
-            model_save_path = os.path.join(save_dir, f"{audio_dataset}_best_acc.pth")
+            model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
             torch.save(model.state_dict(), model_save_path)
             print(f'Best model saved with accuracy: {best_acc:.4f}')
             with open(log_file, 'a') as f:

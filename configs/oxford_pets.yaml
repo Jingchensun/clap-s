@@ -3,11 +3,11 @@ root_path: 'data/'
 
 
 # ------ Load Cache and Features ------
-load_cache: False
-load_pre_feat: False
+# load_cache: False
+# load_pre_feat: False
 
-# load_cache: True
-# load_pre_feat: True
+load_cache: True
+load_pre_feat: True
 
 
 # ------ Hyperparamters ------
@@ -15,7 +15,7 @@ search_hp: True
 # search_hp: False
 
 # search_scale: [10, 30] # best for recorded [10, 30]
-search_scale: [10000, 10000] # best for gunshot [10, 10000]
+search_scale: [1000, 1000] # best for gunshot [10, 10000]
 
 # search_scale: [7, 3]
 # search_scale: [12, 5]
@@ -31,8 +31,8 @@ search_scale: [10000, 10000] # best for gunshot [10, 10000]
 # search_step: [50, 100]
 search_step: [100, 100]
 
-init_beta: 7
-init_alpha: 25
+init_beta: 0.1
+init_alpha: 0.1
 
 
 # ------ Basic Config ------
@@ -42,4 +42,4 @@ backbone: 'RN50'
 
 lr: 0.001
 augment_epoch: 10
-train_epoch: 20
+train_epoch: 15

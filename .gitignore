@@ -375,3 +375,6 @@ cache_dir/
 check-recorded-few-shot-support/
 check-gunshot-few-shot/
 log-recorded-fullshot/
+0-logs-all/
+1-checkpoints-all/
+2-results-all/

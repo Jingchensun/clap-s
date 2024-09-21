@@ -110,7 +110,7 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, mod
                 if adapter:
                     affinity = adapter(features)
                 else:
-                    #features2 = model(features)
+                    # features2 = model(features)
                     affinity = features @ cache_keys
 
                 cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
@@ -119,13 +119,8 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, mod
                 # y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
                 # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
                 # y_preds = (1-alpha)*y_clip + y_cache * alpha
-                #tip_logits = (1-alpha)*clip_logits + cache_logits * alpha
-                logit_scale = 33.3795
-                tip_logits = cache_logits * alpha
-                
-                # adapter_logits = logit_scale * features2  @ clip_weights 
-                # tip_logits = (1-alpha) * clip_logits + adapter_logits * alpha
-                # tip_logits = (1-alpha) * clip_logits + cache_logits * alpha
+                tip_logits = clip_logits + cache_logits * alpha
+                # tip_logits = (1-alpha)*clip_logits + cache_logits * alpha
                 y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
 
                 y_labels = labels.cpu().numpy()
@@ -160,7 +155,7 @@ def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val
         affinity = val_features @ cache_keys 
         cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
         
-        tip_logits = cache_logits * alpha
+        tip_logits = clip_logits + cache_logits * alpha
 
         y_preds = F.softmax(tip_logits.cpu(), dim=1).numpy()
         y_labels = val_labels.cpu().numpy()
@@ -198,7 +193,7 @@ def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val
         cache_logits = affinity2 @ cache_values
         # print('cache_logits:', cache_logits)
         
-        tip_logits = cache_logits * best_alpha
+        tip_logits = (1-best_alpha)*clip_logits + cache_logits * best_alpha
         # print('tip_logits:', tip_logits)
         y_preds = F.softmax(tip_logits.cpu(), dim=1).numpy()
         # print('y_preds:', y_preds)
@@ -223,17 +218,15 @@ def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_featur
         # Tip-Adapter
         beta, alpha = cfg['init_beta'], cfg['init_alpha']
         
-        affinity = val_features2 @ cache_keys 
+        affinity = val_features @ cache_keys 
         cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
 
-        # y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
-        # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
-        # y_preds = (1-alpha)*y_clip + y_cache * alpha
-        # adapter_logits = logit_scale * val_features2 @ clip_weights
+        y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
+        y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
+        y_preds = (1-alpha)*y_clip + y_cache * alpha
         
-        # tip_logits = (1-alpha) * clip_logits + adapter_logits * alpha
-        tip_logits = (1-alpha) * clip_logits + cache_logits * alpha
-        y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
+        # tip_logits = (1-alpha) * clip_logits + cache_logits * alpha
+        # y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
 
         y_labels = val_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
@@ -256,16 +249,15 @@ def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_featur
 
         # Tip-Adapter    
         
-        affinity = test_features2 @ cache_keys
+        affinity = test_features @ cache_keys
         cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
-        # adapter_logits = logit_scale * test_features2 @ clip_weights 
-        # y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
-        # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
-        # y_preds = (1-best_alpha)*y_clip + y_cache * best_alpha
 
-        # tip_logits = (1-best_alpha)*clip_logits + adapter_logits * best_alpha
-        tip_logits = (1-best_alpha)*clip_logits + cache_logits * best_alpha
-        y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
+        y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
+        y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
+        y_preds = (1-best_alpha)*y_clip + y_cache * best_alpha
+
+        # tip_logits = (1-alpha)*clip_logits + cache_logits * best_alpha
+        # y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
         y_labels = test_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
         log.write("**** Hybrid Tip-Adapter test accuracy: {:.2f}. ****\n".format(acc))
@@ -277,6 +269,9 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
         print('cache_keys:', cache_keys.size())
         adapter = nn.Linear(cache_keys.shape[0], cache_keys.shape[1], bias=False).to(device)
         adapter.weight = nn.Parameter(cache_keys.t())
+
+        # adapter = nn.Linear(1024, 1024, bias=False).to(device)
+        # adapter.weight = nn.Parameter(torch.randn(1024, 1024).to(device))
         
         optimizer = torch.optim.AdamW(adapter.parameters(), lr=5e-4, eps=1e-4)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, cfg['train_epoch'] * len(train_loader_F))
@@ -303,7 +298,9 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
                     audio_embeddings = clap_model.get_audio_embeddings(file_path, resample=True).to(device)
                     audio_embeddings = audio_embeddings / torch.norm(audio_embeddings, dim=-1, keepdim=True)
 
-                affinity = adapter(audio_embeddings)
+                
+                affinity  = adapter(audio_embeddings)
+                # affinity = audio_embeddings @ audio_embeddings2.T() 
                 cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
 
                 logit_scale = 33.3795
@@ -331,8 +328,8 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
 
             # Eval
             adapter.eval()
-
             affinity = adapter(test_features)
+            # affinity = test_features @ test_features2
             cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
             clip_logits = 33.3795 * test_features @ clip_weights
             tip_logits = clip_logits + cache_logits * alpha
@@ -356,110 +353,12 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
         log.write(f"**** The best hyperparameters of beta is {best_beta:.2f}, and alpha is {best_alpha:.2f}. ****\n")
         print("\n-------- Evaluating on the test set. --------")
         start_time = time.time()
-        affinity = adapter(test_features)
 
-        cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
-        
-        clip_logits = 33.3795 * test_features @ clip_weights
-        
-        tip_logits = clip_logits + cache_logits * best_alpha
+        # test_features2 = adapter(test_features)
 
-        y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
-        y_labels = test_labels.cpu().numpy()
-        acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        
-        print("**** Tip-Adapter-F test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
-        log.write("**** After Searching hyperparameters, Tip-Adapter-F test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
+        # affinity = val_features @ cache_keys 
+        # cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
 
-        print(f"runing time: {elapsed_time:.4f} s")
-
-def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, train_loader_F, device, model_save_path, log_file):
-    with open(log_file, 'a') as log:
-        # Enable the cached keys to be learnable
-        print('cache_keys:', cache_keys.size())
-        adapter = nn.Linear(cache_keys.shape[0], cache_keys.shape[1], bias=False).to(device)
-        adapter.weight = nn.Parameter(cache_keys.t())
-        
-        optimizer = torch.optim.AdamW(adapter.parameters(), lr=5e-4, eps=1e-4)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, cfg['train_epoch'] * len(train_loader_F))
-
-        # optimizer = torch.optim.AdamW(adapter.parameters(), lr=1e-3, weight_decay=1e-2)
-        # scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        # optimizer, max_lr=0.001, total_steps=len(train_loader_F) * cfg['train_epoch'], pct_start=0.2, anneal_strategy='cos', final_div_factor=100)
-        
-        beta, alpha = cfg['init_beta'], cfg['init_alpha']
-        correct_samples, all_samples = 0, 0
-        best_acc, best_epoch = 0.0, 0
-
-        for train_idx in range(cfg['train_epoch']):
-            # Train
-            adapter.train()
-            correct_samples, all_samples = 0, 0
-            print('Train Epoch: {:} / {:}'.format(train_idx, cfg['train_epoch']))
-
-            epoch_loss = 0.0
-            for batch in tqdm(train_loader_F):
-                file_path, target, one_hot_target = batch
-                one_hot_target = one_hot_target.view(one_hot_target.size(0), -1).to(device)
-                with torch.no_grad():
-                    audio_embeddings = clap_model.get_audio_embeddings(file_path, resample=True).to(device)
-                    audio_embeddings = audio_embeddings / torch.norm(audio_embeddings, dim=-1, keepdim=True)
-
-                affinity = adapter(audio_embeddings)
-                cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-
-                logit_scale = 33.3795
-                clip_logits = logit_scale * audio_embeddings @ clip_weights
-                tip_logits = clip_logits + cache_logits * alpha
-
-                y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
-                y_labels = one_hot_target.cpu().numpy()
-                acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
-                correct_samples += acc * len(tip_logits)
-                all_samples += len(tip_logits)
-
-                loss = F.cross_entropy(tip_logits, one_hot_target.argmax(dim=1))
-                epoch_loss += loss.item()
-
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                scheduler.step()
-
-            avg_epoch_loss = epoch_loss / len(train_loader_F)
-            print("Epoch: {:}, Loss: {:.6f}".format(train_idx, avg_epoch_loss))
-            current_lr = scheduler.get_last_lr()[0]
-            print('LR: {:.6f}, Acc: {:.4f} ({:}/{:}), Loss: {:.4f}'.format(current_lr, correct_samples / all_samples, correct_samples, all_samples, avg_epoch_loss))
-
-            # Eval
-            adapter.eval()
-
-            affinity = adapter(test_features)
-            cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-            clip_logits = 33.3795 * test_features @ clip_weights
-            tip_logits = clip_logits + cache_logits * alpha
-            y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
-            y_labels = test_labels.cpu().numpy()
-            acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
-
-            print("**** Tip-Adapter-F test accuracy: {:.2f}. ****\n".format(acc))
-            if acc > best_acc:
-                best_acc = acc
-                best_epoch = train_idx
-                torch.save(adapter.weight, model_save_path)
-
-        adapter.weight = torch.load(model_save_path)
-        #log.write(f"**** After fine-tuning, Tip-Adapter-F's best test accuracy: {best_acc:.2f}, at epoch: {best_epoch}. ****\n")
-
-        print("\n-------- Searching hyperparameters on the val set. --------")
-
-        # Search Hyperparameters
-        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights, adapter=adapter)
-        log.write(f"**** The best hyperparameters of beta is {best_beta:.2f}, and alpha is {best_alpha:.2f}. ****\n")
-        print("\n-------- Evaluating on the test set. --------")
-        start_time = time.time()
         affinity = adapter(test_features)
 
         cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
@@ -505,7 +404,7 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     text_embeddings = text_embeddings / torch.norm(text_embeddings, dim=-1, keepdim=True)
     text_embeddings = text_embeddings.T
 
-    log_file = os.path.join(f'log-pure-support', f'{shot}shot', f'{audio_dataset}_seed{seed}.txt')
+    log_file = os.path.join(f'log-treff', f'{shot}shot', f'{audio_dataset}_seed{seed}.txt')
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
     cfg = yaml.load(open('configs/oxford_pets.yaml', 'r'), Loader=yaml.Loader)
@@ -523,35 +422,24 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     test_features, test_labels = pre_load_features(cfg, "test", clap_model, test_loader, device, audio_dataset)
 
     # # ------------------------------------------ Tip-Adapter ------------------------------------------
-    run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file)
+    # run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file)
 
      # ------------------------------------------ Tip-Adapter-F ------------------------------------------
-    # save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
-    # os.makedirs(save_dir, exist_ok=True)
-    # model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
-    # run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, train_loader, device, model_save_path, log_file)
+    save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
+    os.makedirs(save_dir, exist_ok=True)
+    model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
+    run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, train_loader, device, model_save_path, log_file)
 
    # ------------------------------------------ Tip-Adapter ------------------------------------------
     # model = Adapter(1024, 4).to(device)
-    # load_path='/home/jingchen/clap-s/check-adapter/'
-    # load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
-    # load_save_path = os.path.join(load_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
-    # print('load model:', load_save_path)
+    # save_path='/home/jingchen/clap-s/check-adapter/'
+    # save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
+    # model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
+    # print('load model:', model_save_path)
     # # checkpoint_path = '/home/jingchen/clap-s/check-gunshot-few-shot/coil_gunshot_resampled_best_acc.pth'
-    # model.load_state_dict(torch.load(load_save_path, map_location=device))
+    # model.load_state_dict(torch.load(model_save_path, map_location=device))
     # run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file, model)
 
-    #  # ------------------------------------------ Tip-Adapter-FS ------------------------------------------
-    # model = Adapter(1024, 4).to(device)
-    # load_path='/home/jingchen/clap-s/check-adapter/'
-    # load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
-    # load_save_path = os.path.join(load_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
-
-    # print('load model:', load_save_path)
-    # save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
-    # os.makedirs(save_dir, exist_ok=True)
-    # model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
-    # run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, train_loader, device, model_save_path, log_file)
 
 
 
