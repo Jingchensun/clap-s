@@ -16,7 +16,7 @@ This command runs the CLAP-Support on the recorded ESC50 dataset. You can modify
 sh clap-support.sh 
 ```
 
-This command runs the CLAP-Support on the ourdoor fiber dataset. You need to change the Dataloader of ESC in Line486-488 to Fiber in the clap-support.py, and then you are able to run the command below:
+This command runs the CLAP-Support on the ourdoor fiber dataset. You need to change the Dataloader of ESC in Line486-488 to Fiber in the `clap-support.py`, and then you are able to run the command below:
 
 ```bash
 sh clap-support2.sh 
