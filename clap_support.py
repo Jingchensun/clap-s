@@ -108,25 +108,20 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clap_weights, mod
             for alpha in alpha_list:
                 if adapter:
                     affinity = adapter(features)
+                    cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
+                    clap_logits = 33.3795 * features @ clap_weights
+                    #tip_logits = (1-alpha)*clap_logits + cache_logits * alpha
+                    logit_scale = 33.3795
+                    tip_logits = cache_logits * alpha + clap_logits
                 else:
                     #features2 = model(features)
                     affinity = features @ cache_keys
+                    cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
+                    clap_logits = 33.3795 * features @ clap_weights
+                    logit_scale = 33.3795
+                    tip_logits = cache_logits * alpha
 
-                cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-                clap_logits = 33.3795 * features @ clap_weights
-
-                # y_clip = F.softmax(clap_logits.detach().cpu(), dim=1).numpy()
-                # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
-                # y_preds = (1-alpha)*y_clip + y_cache * alpha
-                #tip_logits = (1-alpha)*clap_logits + cache_logits * alpha
-                logit_scale = 33.3795
-                tip_logits = cache_logits * alpha
-                
-                # adapter_logits = logit_scale * features2  @ clap_weights 
-                # tip_logits = (1-alpha) * clap_logits + adapter_logits * alpha
-                # tip_logits = (1-alpha) * clap_logits + cache_logits * alpha
                 y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
-
                 y_labels = labels.cpu().numpy()
                 acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
                 if acc > best_acc:
