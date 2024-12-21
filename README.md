@@ -2,6 +2,20 @@
 ![clap_diagrams](clap-support.jpg)
 ### [ICASSP 2025] CLAP-S: Support Set-Based Adaption for Fiber-Optic Acoustic Recognition
 
+
+## Environment Installation
+* Setup conda environment (recommended).
+```bash
+# Create a conda environment
+conda create -n claps python=3.10 -y
+
+# Activate the environment
+conda activate clap
+
+# Install torch
+pip install -r requirement.txt
+```
+
 ## 1 Dataset Preparation
 
 Run the following command to generate the processed fiber_gunshot and coil_gunshot data. Note that you do not need to use the high pass filter.
