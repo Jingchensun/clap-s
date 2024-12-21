@@ -1,5 +1,5 @@
 
-<embed src="main.pdf" width="800px" height="600px" />
+![clap_diagrams](main.png)
 ### [ICASSP 2025] CLAP-S: Support Set-Based Adaption for Fiber-Optic Acoustic Recognition
 
 

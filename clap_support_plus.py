@@ -94,7 +94,7 @@ def pre_load_features(cfg, split, clap_model, loader, device, audio_dataset):
     
     return features, labels
 
-def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, model=None, adapter=None):
+def search_hp(cfg, cache_keys, cache_values, features, labels, clap_weights, model=None, adapter=None):
 
     if cfg['search_hp'] == True:
     
@@ -113,18 +113,18 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, mod
                     affinity = features @ cache_keys
 
                 cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-                clip_logits = 33.3795 * features @ clip_weights
+                clap_logits = 33.3795 * features @ clap_weights
 
-                # y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
+                # y_clip = F.softmax(clap_logits.detach().cpu(), dim=1).numpy()
                 # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
                 # y_preds = (1-alpha)*y_clip + y_cache * alpha
-                #tip_logits = (1-alpha)*clip_logits + cache_logits * alpha
+                #tip_logits = (1-alpha)*clap_logits + cache_logits * alpha
                 logit_scale = 33.3795
                 tip_logits = cache_logits * alpha
                 
-                # adapter_logits = logit_scale * features2  @ clip_weights 
-                # tip_logits = (1-alpha) * clip_logits + adapter_logits * alpha
-                # tip_logits = (1-alpha) * clip_logits + cache_logits * alpha
+                # adapter_logits = logit_scale * features2  @ clap_weights 
+                # tip_logits = (1-alpha) * clap_logits + adapter_logits * alpha
+                # tip_logits = (1-alpha) * clap_logits + cache_logits * alpha
                 y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
 
                 y_labels = labels.cpu().numpy()
@@ -139,15 +139,15 @@ def search_hp(cfg, cache_keys, cache_values, features, labels, clip_weights, mod
 
     return best_beta, best_alpha
 
-def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, log_file):
+def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clap_weights, log_file):
     
     with open(log_file, 'a') as log:
         log.write("\n-------- Searching hyperparameters on the val set. --------\n")
         logit_scale = 33.3795
 
         # Zero-shot CLIP
-        clip_logits = logit_scale * val_features @ clip_weights
-        y_preds = F.softmax(clip_logits.cpu(), dim=1).numpy()
+        clap_logits = logit_scale * val_features @ clap_weights
+        y_preds = F.softmax(clap_logits.cpu(), dim=1).numpy()
         y_labels = val_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
 
@@ -167,14 +167,14 @@ def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val
         # log.write("**** Tip-Adapter's val accuracy: {:.2f}. ****\n".format(acc))
 
         # Search Hyperparameters
-        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights)
+        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clap_weights)
 
 
         log.write("\n-------- Evaluating on the test set. --------\n")
 
         # Zero-shot CLIP
-        clip_logits = logit_scale * test_features @ clip_weights
-        y_preds = F.softmax(clip_logits.cpu(), dim=1).numpy()
+        clap_logits = logit_scale * test_features @ clap_weights
+        y_preds = F.softmax(clap_logits.cpu(), dim=1).numpy()
         y_labels = test_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
         log.write("\n**** Zero-shot CLIP's test accuracy: {:.2f}. ****\n".format(acc))
@@ -193,7 +193,7 @@ def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
         log.write("**** Tip-Adapter test accuracy: {:.2f}. ****\n".format(acc))
 
-def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, log_file, model):
+def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clap_weights, log_file, model):
     
     with open(log_file, 'a') as log:
         log.write("\n-------- Searching hyperparameters on the val set. --------\n")
@@ -201,8 +201,8 @@ def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_featur
 
         val_features2 = model(val_features)
         # Zero-shot CLIP
-        clip_logits = logit_scale * val_features2 @ clip_weights
-        y_preds = F.softmax(clip_logits.cpu(), dim=1).detach().numpy()
+        clap_logits = logit_scale * val_features2 @ clap_weights
+        y_preds = F.softmax(clap_logits.cpu(), dim=1).detach().numpy()
         y_labels = val_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
         # log.write("\n**** Zero-shot CLIP's val accuracy: {:.2f}. ****\n".format(acc))
@@ -213,13 +213,13 @@ def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_featur
         affinity = val_features2 @ cache_keys 
         cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
 
-        # y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
+        # y_clip = F.softmax(clap_logits.detach().cpu(), dim=1).numpy()
         # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
         # y_preds = (1-alpha)*y_clip + y_cache * alpha
-        # adapter_logits = logit_scale * val_features2 @ clip_weights
+        # adapter_logits = logit_scale * val_features2 @ clap_weights
         
-        # tip_logits = (1-alpha) * clip_logits + adapter_logits * alpha
-        tip_logits = (1-alpha) * clip_logits + cache_logits * alpha
+        # tip_logits = (1-alpha) * clap_logits + adapter_logits * alpha
+        tip_logits = (1-alpha) * clap_logits + cache_logits * alpha
         y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
 
         y_labels = val_labels.cpu().numpy()
@@ -229,14 +229,14 @@ def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_featur
         # Search Hyperparameters
         
         test_features2=model(test_features)
-        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, test_features, test_labels, clip_weights, model=model)
+        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, test_features, test_labels, clap_weights, model=model)
         log.write(f"**** The best hyperparameters of beta is {best_beta:.2f}, and alpha is {best_alpha:.2f}. ****\n")
 
         # log.write("\n-------- Evaluating on the test set. --------\n")
 
         # Zero-shot CLIP
-        clip_logits = logit_scale * test_features2 @ clip_weights
-        y_preds = F.softmax(clip_logits.cpu(), dim=1).detach().numpy()
+        clap_logits = logit_scale * test_features2 @ clap_weights
+        y_preds = F.softmax(clap_logits.cpu(), dim=1).detach().numpy()
         y_labels = test_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
         # log.write("\n**** Zero-shot CLIP's test accuracy: {:.2f}. ****\n".format(acc))
@@ -245,20 +245,20 @@ def run_tip_adapter_hybrid(cfg, clap_model, cache_keys, cache_values, val_featur
         
         affinity = test_features2 @ cache_keys
         cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
-        # adapter_logits = logit_scale * test_features2 @ clip_weights 
-        # y_clip = F.softmax(clip_logits.detach().cpu(), dim=1).numpy()
+        # adapter_logits = logit_scale * test_features2 @ clap_weights 
+        # y_clip = F.softmax(clap_logits.detach().cpu(), dim=1).numpy()
         # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
         # y_preds = (1-best_alpha)*y_clip + y_cache * best_alpha
 
-        # tip_logits = (1-best_alpha)*clip_logits + adapter_logits * best_alpha
-        tip_logits = (1-best_alpha)*clip_logits + cache_logits * best_alpha
+        # tip_logits = (1-best_alpha)*clap_logits + adapter_logits * best_alpha
+        tip_logits = (1-best_alpha)*clap_logits + cache_logits * best_alpha
         y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
         y_labels = test_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
         log.write("**** Hybrid Tip-Adapter test accuracy: {:.2f}. ****\n".format(acc))
 
 
-def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, train_loader_F, device, model_save_path, log_file):
+def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clap_weights, train_loader_F, device, model_save_path, log_file):
     with open(log_file, 'a') as log:
         # Enable the cached keys to be learnable
         print('cache_keys:', cache_keys.size())
@@ -294,8 +294,8 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
                 cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
 
                 logit_scale = 33.3795
-                clip_logits = logit_scale * audio_embeddings @ clip_weights
-                tip_logits = clip_logits + cache_logits * alpha
+                clap_logits = logit_scale * audio_embeddings @ clap_weights
+                tip_logits = clap_logits + cache_logits * alpha
 
                 y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
                 y_labels = one_hot_target.cpu().numpy()
@@ -321,8 +321,8 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
 
             affinity = adapter(test_features)
             cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-            clip_logits = 33.3795 * test_features @ clip_weights
-            tip_logits = clip_logits + cache_logits * alpha
+            clap_logits = 33.3795 * test_features @ clap_weights
+            tip_logits = clap_logits + cache_logits * alpha
             y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
             y_labels = test_labels.cpu().numpy()
             acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
@@ -339,7 +339,7 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
         print("\n-------- Searching hyperparameters on the val set. --------")
 
         # Search Hyperparameters
-        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights, adapter=adapter)
+        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clap_weights, adapter=adapter)
         log.write(f"**** The best hyperparameters of beta is {best_beta:.2f}, and alpha is {best_alpha:.2f}. ****\n")
         print("\n-------- Evaluating on the test set. --------")
         start_time = time.time()
@@ -347,9 +347,9 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
 
         cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
         
-        clip_logits = 33.3795 * test_features @ clip_weights
+        clap_logits = 33.3795 * test_features @ clap_weights
         
-        tip_logits = clip_logits + cache_logits * best_alpha
+        tip_logits = clap_logits + cache_logits * best_alpha
 
         y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
         y_labels = test_labels.cpu().numpy()
@@ -362,7 +362,7 @@ def run_tip_adapter_F(cfg, clap_model, cache_keys, cache_values, val_features, v
 
         print(f"runing time: {elapsed_time:.4f} s")
 
-def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clip_weights, train_loader_F, device, model_save_path, log_file):
+def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clap_weights, train_loader_F, device, model_save_path, log_file):
     with open(log_file, 'a') as log:
         # Enable the cached keys to be learnable
         print('cache_keys:', cache_keys.size())
@@ -398,8 +398,8 @@ def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, 
                 cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
 
                 logit_scale = 33.3795
-                clip_logits = logit_scale * audio_embeddings @ clip_weights
-                tip_logits = clip_logits + cache_logits * alpha
+                clap_logits = logit_scale * audio_embeddings @ clap_weights
+                tip_logits = clap_logits + cache_logits * alpha
 
                 y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
                 y_labels = one_hot_target.cpu().numpy()
@@ -425,8 +425,8 @@ def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, 
 
             affinity = adapter(test_features)
             cache_logits = ((-1) * (beta - beta * affinity)).exp() @ cache_values
-            clip_logits = 33.3795 * test_features @ clip_weights
-            tip_logits = clip_logits + cache_logits * alpha
+            clap_logits = 33.3795 * test_features @ clap_weights
+            tip_logits = clap_logits + cache_logits * alpha
             y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
             y_labels = test_labels.cpu().numpy()
             acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
@@ -443,7 +443,7 @@ def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, 
         print("\n-------- Searching hyperparameters on the val set. --------")
 
         # Search Hyperparameters
-        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clip_weights, adapter=adapter)
+        best_beta, best_alpha = search_hp(cfg, cache_keys, cache_values, val_features, val_labels, clap_weights, adapter=adapter)
         log.write(f"**** The best hyperparameters of beta is {best_beta:.2f}, and alpha is {best_alpha:.2f}. ****\n")
         print("\n-------- Evaluating on the test set. --------")
         start_time = time.time()
@@ -451,9 +451,9 @@ def run_tip_adapter_FS(cfg, clap_model, cache_keys, cache_values, val_features, 
 
         cache_logits = ((-1) * (best_beta - best_beta * affinity)).exp() @ cache_values
         
-        clip_logits = 33.3795 * test_features @ clip_weights
+        clap_logits = 33.3795 * test_features @ clap_weights
         
-        tip_logits = clip_logits + cache_logits * best_alpha
+        tip_logits = clap_logits + cache_logits * best_alpha
 
         y_preds = F.softmax(tip_logits.detach().cpu(), dim=1).numpy()
         y_labels = test_labels.cpu().numpy()
@@ -552,4 +552,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(**vars(args))
-
