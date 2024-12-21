@@ -1,5 +1,5 @@
 
-![clap_diagrams](clap-support.jpg)
+![clap_diagrams](main.pdf)
 ### [ICASSP 2025] CLAP-S: Support Set-Based Adaption for Fiber-Optic Acoustic Recognition
 
 
@@ -45,3 +45,16 @@ python analysis_result_support.py
 
 ## Contact
 If you have any questions regarding this repo, please contact Jingchen Sun (jsun39@buffalo.edu).
+
+## Citing Craft
+
+If you find this repository useful, please consider giving a star :star: and citation
+
+```
+@article{sun2024claps,
+  title={CLAP-S: Support Set-Based Adaption for Fiber-Optic Acoustic Recognition},
+  author={Jingchen Sun, Shaobo Han, Wataru Kohno, Changyou Chen},
+  journal={ICASSP},
+  year={2025}
+}
+```

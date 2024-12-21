@@ -4,7 +4,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from msclap import CLAP
-from esc50_dataset import ESC50
+from esc50_dataset_split import ESC50
+from fiber_dataset import Fiber
 import torch.nn.functional as F
 import numpy as np
 from tqdm import tqdm
@@ -182,6 +183,18 @@ def run_tip_adapter(cfg, clap_model, cache_keys, cache_values, val_features, val
         # Tip-Adapter    
         affinity = test_features @ cache_keys
         affinity2 = ((-1) * (best_beta - best_beta * affinity)).exp()
+        # print('affinity2:', affinity2)
+        # top_k = 3
+        # # 取每一行中 top_k 最大的值，保留它们的位置
+        # top_k_values, indices = affinity2.topk(top_k, dim=-1)
+        # # 创建一个和 affinity2 大小相同的矩阵，值为 -inf
+        # zeros = torch.full_like(affinity2, float('-inf'))
+        # # 将 top_k 值放到相应的位置，其余位置保持为 -inf
+        # sparse_logits = zeros.scatter(-1, indices, top_k_values)
+        # # 对 top_k 值应用 softmax
+        # affinity3 = F.softmax(sparse_logits, dim=-1)
+        # # print('affinity3:', affinity3)
+        # # print('cache_values:', cache_values.size())
         cache_logits = affinity2 @ cache_values
         # print('cache_logits:', cache_logits)
         
@@ -474,6 +487,10 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
     test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
 
+    # train_set = Fiber(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+    # val_set = Fiber(root=root_path, subset='val', audio_dataset=audio_dataset)
+    # test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
+
     train_loader_cache =  DataLoader(train_set, batch_size=64, shuffle=False)
     train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
     val_loader = DataLoader(val_set, batch_size=64)
@@ -491,7 +508,7 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     log_file = os.path.join(f'log-pure-support', f'{shot}shot', f'{audio_dataset}_seed{seed}.txt')
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-    cfg = yaml.load(open('configs/clap_s.yaml', 'r'), Loader=yaml.Loader)
+    cfg = yaml.load(open('configs/oxford_pets.yaml', 'r'), Loader=yaml.Loader)
 
     # Construct the cache model by few-shot training set
     print("\nConstructing cache model by few-shot visual features and labels.")

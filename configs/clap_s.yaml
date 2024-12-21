@@ -3,11 +3,11 @@ root_path: 'data/'
 
 
 # ------ Load Cache and Features ------
-# load_cache: False
-# load_pre_feat: False
+load_cache: False
+load_pre_feat: False
 
-load_cache: True
-load_pre_feat: True
+# load_cache: True
+# load_pre_feat: True
 
 
 # ------ Hyperparamters ------
@@ -36,7 +36,6 @@ init_alpha: 0.1
 
 
 # ------ Basic Config ------
-dataset: 'oxford_pets'
 shots: 16
 backbone: 'RN50'
 
