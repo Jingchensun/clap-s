@@ -36,8 +36,8 @@ This command runs the CLAP-Support on the recorded ESC50 dataset. You can modify
 sh clap_support.sh 
 ```
 
-## 3 Run the CLAP-S$^+$ 
-Before running CLAP-S$^+$, you need to obtain the weights of the 'Adapter,' which consists of two MLP layers. Use the command below to train a few-shot Adapter and save the checkpoint.
+## 3 Run the CLAP-S⁺ 
+Before running CLAP-S⁺, you need to obtain the weights of the 'Adapter,' which consists of two MLP layers. Use the command below to train a few-shot Adapter and save the checkpoint.
 
 ```bash
 sh clap_adapter.sh
@@ -52,8 +52,8 @@ sh clap_support_plus.sh
 |---------------|------------|------------|
 | CLAP-S        | 90         | 93         |
 | CLAP-S-F      | 94         | 94         |
-| CLAP-S$^+$    | 89         | 92         |
-| CLAP-S$^+$-F  | 94         | 94         |
+| CLAP-S⁺       | 89         | 92         |
+| CLAP-S⁺-F     | 94         | 94         |
 
 Here are some results from ESC50, for your reference.
 
