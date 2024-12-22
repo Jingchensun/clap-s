@@ -13,7 +13,7 @@ do
             --epochs 20 \
             --save_path 'check-adapter/' \
             --seed "$seed" \
-            --shot '2'
+            --shot '1'
             # --checkpoint_path '/home/jingchen/clap-s/check-adapter' \
             # --eval True
     done

@@ -10,7 +10,7 @@ do
             --model_version 2023 \
             --use_cuda True \
             --seed "$seed" \
-            --shot '2' \
+            --shot '1' \
             --save_path 'check-s/' \
             # --checkpoint_path '/home/jingchen/clap/2-check-gunshot-all/check-gounshot-1shot/fiber_gunshot-resampled_best_acc.pth'\
             # --eval True

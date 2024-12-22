@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from msclap import CLAP
-from esc50_dataset import ESC50
+from configs.esc50_dataset import ESC50
 import torch.nn.functional as F
 import numpy as np
 from tqdm import tqdm
