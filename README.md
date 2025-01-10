@@ -1,6 +1,6 @@
 
 ![clap_diagrams](examples/main.png)
-### [ICASSP 2025] CLAP-S: Support Set-Based Adaption for Fiber-Optic Acoustic Recognition
+### [ICASSP 2025] CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition
 
 
 ## Environment Installation
@@ -21,6 +21,7 @@ pip install -r requirement.txt
 
 ## 1 Dataset Preparation
 ### Outdoor Fiber Acoustic Dataset
+[audio sample: Crackers](examples/train_367_Crackers.png)
 Download the outdoor gunshot fiber dataset from [Google Drive](https://drive.google.com/drive/folders/1P45O415eiUN_Emp1ENTRkB5wcw2wCRos?ths=true) and extract them
 ```bash
 tar -xvf coil_gunshot_resampled.tar.gz
@@ -74,7 +75,7 @@ If you find this repository useful, please consider giving a star :star: and cit
 
 ```
 @article{sun2024claps,
-  title={CLAP-S: Support Set-Based Adaption for Fiber-Optic Acoustic Recognition},
+  title={CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition},
   author={Jingchen Sun, Shaobo Han, Wataru Kohno, Changyou Chen},
   journal={ICASSP},
   year={2025}
