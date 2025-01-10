@@ -20,7 +20,15 @@ pip install -r requirement.txt
 ```
 
 ## 1 Dataset Preparation
-Due to some commercial reasons, we are unable to release our fiber-optic acoustic dataset. However, we have demonstrated our algorithm using the publicly available ESC50 dataset. You can replace it easily with your own dataset. The proposed algorithms, CLAP-S and CLAP-S$^+$,  have been tested and can successfully run on ESC50 dataset. Below are the detailed instructions.
+### Outdoor Fiber Acoustic Dataset
+Download the outdoor gunshot fiber dataset from [Google Drive](https://drive.google.com/drive/folders/1P45O415eiUN_Emp1ENTRkB5wcw2wCRos?ths=true) and extract them
+```bash
+tar -xvf coil_gunshot_resampled.tar.gz
+tar -xvf fiber_gunshot_resampled.tar.gz
+```
+
+### Other Downstream Acoustic Dataset =  ESC50
+We have demonstrated our algorithm using the publicly available ESC50 dataset. You can replace it easily with your own dataset. The proposed algorithms, CLAP-S and CLAP-S$^+$,  have been tested and can successfully run on ESC50 dataset. Below are the detailed instructions.
 
 Download the ESC50 dataset
 ```bash
