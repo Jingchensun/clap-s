@@ -21,12 +21,12 @@ pip install -r requirement.txt
 
 ## 1 Dataset Preparation
 ### Outdoor Fiber Acoustic Dataset
-<!-- ![audio sample: Crackers](examples/train_367_Crackers.png)
-[audio sample: Crackers](examples/train_367.wav) -->
+
 <div style="text-align: center;">
   <p><a href="examples/train_367.wav">audio sample: Crackers</a></p>
   <img src="examples/train_367_Crackers.png" alt="audio sample: Crackers">
 </div>
+
 Download the outdoor gunshot fiber dataset from [Google Drive](https://drive.google.com/drive/folders/1P45O415eiUN_Emp1ENTRkB5wcw2wCRos?ths=true) and extract them
 ```bash
 tar -xvf coil_gunshot_resampled.tar.gz
