@@ -10,18 +10,9 @@ load_pre_feat: False
 search_hp: True
 # search_hp: False
 
-# search_scale: [10, 30] # best for recorded [10, 30]
-search_scale: [1000, 1000] # best for gunshot [10, 10000]
+# best setting for fiber firework-gunshot dataset
+search_scale: [1000, 10] 
 search_step: [100, 100]
-# search_scale: [7, 3]
-# search_scale: [12, 5]
-# search_scale: [12, 10]
-# search_scale: [20, 10] # same as 12,10
-# search_scale: [10, 10]
-# search_scale: [13, 13] # better than 12,10
-# search_scale: [30, 30] # better than 13, 13
-# search_scale: [50, 50]
-# search_step: [50, 100]
 
 
 init_beta: 0.1

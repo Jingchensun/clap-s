@@ -1,10 +1,10 @@
 <div align="center">
-<h1> [ICASSP 2025] CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition </h1>
+<h1> CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition </h1>
 
 [Jingchen Sun](https://jingchensun.github.io/)<sup>1, 2</sup>, [Shaobo Han](https://shaobohan.net/)<sup>1</sup>, [Wataru Kohno](https://scholar.google.es/citations?user=-o4nExgAAAAJ&hl=vi)<sup>1</sup>, [Changyou Chen](https://cse.buffalo.edu/~changyou/)<sup>2</sup>
 
 <sup>1</sup>  NEC Labs America, USA  
-<sup>2</sup>  SUniversity at Buffalo, The State University of New York, USA
+<sup>2</sup>  University at Buffalo, The State University of New York, USA
 
 
 [![GitHub Project](https://img.shields.io/badge/GitHub-Project-blue?logo=github)](https://github.com/Jingchensun/clap-s)
@@ -45,7 +45,7 @@ tar -xvf coil_gunshot_resampled.tar.gz
 tar -xvf fiber_gunshot_resampled.tar.gz
 ```
 
-### Other Downstream Acoustic Dataset =  ESC50
+### Other Downstream Acoustic Dataset ESC50
 We have demonstrated our algorithm using the publicly available ESC50 dataset. You can replace it easily with your own dataset. The proposed algorithms, CLAP-S and CLAP-S$^+$,  have been tested and can successfully run on ESC50 dataset. Below are the detailed instructions.
 
 Download the ESC50 dataset
@@ -91,10 +91,10 @@ If you have any questions regarding this repo, please contact Jingchen Sun (jsun
 If you find this repository useful, please consider giving a star :star: and citation
 
 ```
-@article{sun2024claps,
-  title={CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition},
-  author={Jingchen Sun, Shaobo Han, Wataru Kohno, Changyou Chen},
-  journal={ICASSP},
+@article{sun2025clap,
+  title={CLAP-S: Support Set Based Adaptation for Downstream Fiber-optic Acoustic Recognition},
+  author={Sun, Jingchen and Han, Shaobo and Kohno, Wataru and Chen, Changyou},
+  journal={arXiv preprint arXiv:2501.09877},
   year={2025}
 }
 ```
