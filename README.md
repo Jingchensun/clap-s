@@ -1,7 +1,19 @@
+<div align="center">
+<h1> [ICASSP 2025] CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition </h1>
 
+[Jingchen Sun](https://jingchensun.github.io/)<sup>1, 2</sup>, [Shaobo Han](https://924973292.github.io//)<sup>1</sup>, [Wataru Kohno](https://scholar.google.es/citations?user=-o4nExgAAAAJ&hl=vi)<sup>1</sup>, [Changyou Chen](https://cse.buffalo.edu/~changyou/)<sup>2</sup>
+
+<sup>1</sup>  NEC Labs America, USA  
+<sup>2</sup>  SUniversity at Buffalo, The State University of New York, USA
+
+[![arXiv](https://img.shields.io/badge/arXiv-2404.04256-b31b1b.svg)](https://arxiv.org/abs/2404.04256) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Project](https://img.shields.io/twitter/url/https/twitter.com/bukotsunikki.svg)](https://x.com/_akhaliq/status/1777272323504025769)
+
+</div>
+
+## Introduction
+This repository contains the code and dataset for our paper `CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition`. [[Paper](https://arxiv.org/abs/2501.09877)]
 ![clap_diagrams](examples/main.png)
-### [ICASSP 2025] CLAP-S: Support Set-Based Adaptation for Downstream Fiber-Optic Acoustic Recognition
-
 
 ## Environment Installation
 * Setup conda environment (recommended).
