@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from msclap import CLAP
 from configs.esc50_dataset import ESC50
+from configs.fiber_dataset import Fiber
 import torch.nn.functional as F
 import numpy as np
 from tqdm import tqdm
@@ -168,10 +169,10 @@ def clap_support_plus(cfg, clap_model, cache_keys, cache_values, val_features, v
         # y_clip = F.softmax(clap_logits.detach().cpu(), dim=1).numpy()
         # y_cache = F.softmax(cache_logits.detach().cpu(), dim=1).numpy()
         # y_preds = (1-alpha)*y_clip + y_cache * alpha
-        # adapter_logits = logit_scale * val_features2 @ clap_weights
+        adapter_logits = logit_scale * val_features2 @ clap_weights
         
-        # tip_logits = (1-alpha) * clap_logits + adapter_logits * alpha
-        tip_logits = (1-alpha) * clap_logits + cache_logits * alpha
+        tip_logits = (1-alpha) * clap_logits + adapter_logits * alpha
+        # tip_logits = (1-alpha) * clap_logits + cache_logits * alpha
         y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
 
         y_labels = val_labels.cpu().numpy()
@@ -207,7 +208,8 @@ def clap_support_plus(cfg, clap_model, cache_keys, cache_values, val_features, v
         y_preds = F.softmax(tip_logits.cpu(), dim=1).detach().numpy()
         y_labels = test_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
-        log.write("**** Hybrid Tip-Adapter test accuracy: {:.2f}. ****\n".format(acc))
+        print("**** CLAP-Support-Plus test accuracy: {:.2f}.\n".format(acc))
+        log.write("**** CLAP-Support-Plus test accuracy: {:.2f}. ****\n".format(acc))
 
 
 def clap_support_plus_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, clap_weights, train_loader_F, device, model_save_path, log_file):
@@ -275,7 +277,7 @@ def clap_support_plus_F(cfg, clap_model, cache_keys, cache_values, val_features,
             y_labels = test_labels.cpu().numpy()
             acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
 
-            print("**** Tip-Adapter-F test accuracy: {:.2f}. ****\n".format(acc))
+            print("**** CLAP-Support-Plus-F test accuracy: {:.2f}. ****\n".format(acc))
             if acc > best_acc:
                 best_acc = acc
                 best_epoch = train_idx
@@ -305,18 +307,23 @@ def clap_support_plus_F(cfg, clap_model, cache_keys, cache_values, val_features,
         end_time = time.time()
         elapsed_time = end_time - start_time
         
-        print("**** Tip-Adapter-F test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
+        print("**** CLAP-Support-Plus-F accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
         log.write("**** After Searching hyperparameters, Tip-Adapter-F test accuracy: {:.2f}. ****\n".format(max(best_acc, acc)))
 
         print(f"runing time: {elapsed_time:.4f} s")
 
-def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, shot, checkpoint_path=None, eval=False):
+def main(root_path, audio_dataset, dataset, model_version, use_cuda, save_path, seed, shot, checkpoint_path=None, eval=False):
     set_seed(seed)
 
 
-    train_set = ESC50(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
-    val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
-    test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
+    if dataset == "ESC50":
+        train_set = ESC50(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+        val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
+        test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
+    else:
+        train_set = Fiber(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+        val_set = Fiber(root=root_path, subset='val', audio_dataset=audio_dataset)
+        test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
 
     train_loader_cache =  DataLoader(train_set, batch_size=64, shuffle=False)
     train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
@@ -332,10 +339,10 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     text_embeddings = text_embeddings / torch.norm(text_embeddings, dim=-1, keepdim=True)
     text_embeddings = text_embeddings.T
 
-    log_file = os.path.join(f'log-pure-support', f'{shot}shot', f'{audio_dataset}_seed{seed}.txt')
+    log_file = os.path.join(f'log-clap-plus', f'{shot}shot', f'{audio_dataset}_seed{seed}.txt')
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-    cfg = yaml.load(open('configs/clap_support.yaml', 'r'), Loader=yaml.Loader)
+    cfg = yaml.load(open('configs/clap_support_plus.yaml', 'r'), Loader=yaml.Loader)
 
     # Construct the cache model by few-shot training set
     print("\nConstructing cache model by few-shot visual features and labels.")
@@ -360,16 +367,16 @@ def main(root_path, audio_dataset, model_version, use_cuda, save_path, seed, sho
     clap_support_plus(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file, model)
 
     #  # ------------------------------------------  CLAP-Support-Plus-F (Trainable SupportSet) ------------------------------------------
-    model = Adapter(1024, 4).to(device)
-    load_path='/home/jingchen/clap-s/check-adapter/'
-    load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
-    load_save_path = os.path.join(load_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
+    # model = Adapter(1024, 4).to(device)
+    # load_path='/home/jingchen/clap-s/check-adapter/'
+    # load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
+    # load_save_path = os.path.join(load_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
 
-    print('load model:', load_save_path)
-    save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
-    os.makedirs(save_dir, exist_ok=True)
-    model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
-    clap_support_plus_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, train_loader, device, model_save_path, log_file)
+    # print('load model:', load_save_path)
+    # save_dir = os.path.join(os.path.dirname(save_path), f"{shot}shot")
+    # os.makedirs(save_dir, exist_ok=True)
+    # model_save_path = os.path.join(save_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
+    # clap_support_plus_F(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, train_loader, device, model_save_path, log_file)
 
 
 
@@ -377,6 +384,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run CLAP zero-shot classification on ESC50 dataset with train, val, test split')
     parser.add_argument('--root_path', type=str, required=True, help='Root path to ESC-50 dataset')
     parser.add_argument('--audio_dataset', type=str, required=True, help='Path to the audio dataset')
+    parser.add_argument('--dataset', type=str, required=True, help='ESC50 or Fiber dataset flag')
     parser.add_argument('--model_version', type=str, default='2023', help='Version of CLAP model to use')
     parser.add_argument('--use_cuda', type=bool, default=True, help='Use CUDA for computation')
     parser.add_argument('--save_path', type=str, default='checkpoint/best_model.pth', help='Path to save the best model')

@@ -76,16 +76,47 @@ class Fiber(AudioDataset):
             self._save_to_json()
 
         self.class_to_idx = classes
-
     def _load_meta(self):
-        """Load metadata from the pickle file."""
-        with open(self.data_path + self.audio_dir + '.pickle', 'rb') as input_file:
-            data_dict = pickle.load(input_file)  # 加载数据字典
-        self.train_x = data_dict['train_x']
-        self.target_train = data_dict['train_y']
-        self.test_x = data_dict['test_x']
-        self.target_test = data_dict['test_y']
-        self.classes = list(classes.keys())
+        """Load metadata from the pickle file or from text files if available."""
+        train_txt_file = os.path.join(self.data_path, self.audio_dir + '_train_labels.txt')
+        test_txt_file = os.path.join(self.data_path, self.audio_dir + '_test_labels.txt')
+        classes_txt_file = os.path.join(self.data_path, self.audio_dir + '_classes.txt')
+
+        if os.path.exists(train_txt_file) and os.path.exists(test_txt_file) and os.path.exists(classes_txt_file):
+            # 如果存在txt文件，直接加载数据
+            self._load_from_txt(train_txt_file, test_txt_file, classes_txt_file)
+            print(f'Loaded labels and classes from {train_txt_file}, {test_txt_file}, and {classes_txt_file}')
+        else:
+            # 如果txt文件不存在，加载pickle文件并存储到txt
+            pickle_file = os.path.join(self.data_path, self.audio_dir + '.pickle')
+            with open(pickle_file, 'rb') as input_file:
+                data_dict = pickle.load(input_file)  # 加载数据字典
+
+            self.target_train = data_dict['train_y']
+            self.target_test = data_dict['test_y']
+            self.classes = list(classes.keys())
+
+            # 将数据保存到txt文件
+            self._save_to_txt(train_txt_file, test_txt_file, classes_txt_file)
+            print(f'Saved labels and classes to {train_txt_file}, {test_txt_file}, and {classes_txt_file}')
+
+    def _save_to_txt(self, train_txt_file, test_txt_file, classes_txt_file):
+        """Save labels and classes to text files for faster future loading."""
+        np.savetxt(train_txt_file, self.target_train, fmt='%d')
+        np.savetxt(test_txt_file, self.target_test, fmt='%d')
+        
+        # 保存类别信息
+        with open(classes_txt_file, 'w') as f:
+            f.write("\n".join(self.classes))
+
+    def _load_from_txt(self, train_txt_file, test_txt_file, classes_txt_file):
+        """Load labels and classes from text files."""
+        self.target_train = np.loadtxt(train_txt_file, dtype=int).tolist()
+        self.target_test = np.loadtxt(test_txt_file, dtype=int).tolist()
+        
+        # 读取类别信息
+        with open(classes_txt_file, 'r') as f:
+            self.classes = [line.strip() for line in f.readlines()]
 
     def _split_train_val(self):
         """Split the train set into balanced train and val subsets."""

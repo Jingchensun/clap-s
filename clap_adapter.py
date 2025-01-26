@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from msclap import CLAP
 from configs.esc50_dataset import ESC50
+from configs.fiber_dataset import Fiber
 import torch.nn.functional as F
 import numpy as np
 from tqdm import tqdm
@@ -78,13 +79,17 @@ def evaluate(clap_model, model, dataloader, text_embeddings, device, class_names
 
     return overall_acc, per_class_acc
 
-def main(root_path, audio_dataset, model_version, use_cuda, download_dataset, epochs, save_path, shot, seed, checkpoint_path=None, eval=False):
+def main(root_path, audio_dataset, dataset, model_version, use_cuda, download_dataset, epochs, save_path, shot, seed, checkpoint_path=None, eval=False):
     set_seed(seed)
 
-
-    train_set = ESC50(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
-    val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
-    test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
+    if dataset == "ESC50":
+        train_set = ESC50(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+        val_set = ESC50(root=root_path, subset='val', audio_dataset=audio_dataset)
+        test_set = ESC50(root=root_path, subset='test', audio_dataset=audio_dataset)
+    else:
+        train_set = Fiber(root=root_path, subset='train', audio_dataset=audio_dataset, shot=shot, seed = seed)
+        val_set = Fiber(root=root_path, subset='val', audio_dataset=audio_dataset)
+        test_set = Fiber(root=root_path, subset='test', audio_dataset=audio_dataset)
 
     train_loader = DataLoader(train_set, batch_size=128, shuffle=True)
     val_loader = DataLoader(val_set, batch_size=128)
@@ -159,6 +164,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run CLAP zero-shot classification on ESC50 dataset with train, val, test split')
     parser.add_argument('--root_path', type=str, required=True, help='Root path to ESC-50 dataset')
     parser.add_argument('--audio_dataset', type=str, required=True, help='Path to the audio dataset')
+    parser.add_argument('--dataset', type=str, required=True, help='ESC50 or Fiber dataset flag')
     parser.add_argument('--model_version', type=str, default='2023', help='Version of CLAP model to use')
     parser.add_argument('--use_cuda', type=bool, default=True, help='Use CUDA for computation')
     parser.add_argument('--download_dataset', type=bool, default=False, help='Download the ESC-50 dataset if not available')
