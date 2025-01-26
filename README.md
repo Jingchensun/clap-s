@@ -79,8 +79,6 @@ sh clap_support_plus.sh
 | CLAP-S  | Training-Free      | 57.0   | 65.0   | 67.0   | 72.0   | 85.0      |
 | CLAP-S⁺ | Training-Required  | 62.0   | 68.0   | 67.0   | 69.0   | 87.0      |
 
-Here are some results from ESC50, for your reference.
-
 ## Contact
 If you have any questions regarding this repo, please contact Jingchen Sun (jsun39@buffalo.edu).
 
