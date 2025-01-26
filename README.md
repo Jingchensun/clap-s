@@ -45,15 +45,6 @@ tar -xvf coil_gunshot_resampled.tar.gz
 tar -xvf fiber_gunshot_resampled.tar.gz
 ```
 
-### Other Downstream Acoustic Dataset ESC50
-We have demonstrated our algorithm using the publicly available ESC50 dataset. You can replace it easily with your own dataset. The proposed algorithms, CLAP-S and CLAP-S$^+$,  have been tested and can successfully run on ESC50 dataset. Below are the detailed instructions.
-
-Download the ESC50 dataset
-```bash
-mkdir data
-wget -c https://github.com/karoldvl/ESC-50/archive/master.zip
-unzip master.zip
-```
 
 ## 2 Run the CLAP-S
 This command runs the CLAP-Support on the recorded ESC50 dataset. You can modify the dataset and random seed.
@@ -74,12 +65,19 @@ After obtaining the Adapter checkpoint, you can train the trainable audio featur
 sh clap_support_plus.sh
 ```
 ## 4 Experiment Result
-| Method        | Shot-1 (%) | Shot-2 (%) |
-|---------------|------------|------------|
-| CLAP-S        | 90         | 93         |
-| CLAP-S-F      | 94         | 94         |
-| CLAP-S⁺       | 89         | 92         |
-| CLAP-S⁺-F     | 94         | 94         |
+### Fiber-Gunshot Performance
+
+| Model  | Training Type       | 1-shot | 2-shot | 4-shot | 8-shot | Full shot |
+|--------|---------------------|--------|--------|--------|--------|-----------|
+| CLAP-S  | Training-Free      | 49.0   | 57.0   | 60.0   | 71.0   | 84.0      |
+| CLAP-S⁺ | Training-Required  | 58.0   | 66.0   | 70.0   | 78.0   | 86.0      |
+
+### Coil-Gunshot Performance
+
+| Model  | Training Type       | 0-shot | 2-shot | 4-shot | 8-shot | Full shot |
+|--------|---------------------|--------|--------|--------|--------|-----------|
+| CLAP-S  | Training-Free      | 57.0   | 65.0   | 67.0   | 72.0   | 85.0      |
+| CLAP-S⁺ | Training-Required  | 62.0   | 68.0   | 67.0   | 69.0   | 87.0      |
 
 Here are some results from ESC50, for your reference.
 
