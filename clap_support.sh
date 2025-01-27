@@ -8,7 +8,7 @@ do
     for seed in 1
     do
         CUDA_VISIBLE_DEVICES=1 python clap_support.py \
-            --root_path /home/jingchen/data/fiber-data/gunshot-only-resample \
+            --root_path data \
             --dataset Fiber-firework \
             --audio_dataset "$audio_dir" \
             --model_version 2023 \

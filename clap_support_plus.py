@@ -358,11 +358,10 @@ def main(root_path, audio_dataset, dataset, model_version, use_cuda, save_path, 
 
    # ------------------------------------------ CLAP-Support-Plus ------------------------------------------
     model = Adapter(1024, 4).to(device)
-    load_path='/home/jingchen/clap-s/check-adapter/'
+    load_path='check-adapter/'
     load_dir = os.path.join(os.path.dirname(load_path), f"{shot}shot")
     load_save_path = os.path.join(load_dir, f"{shot}shot_seed{seed}_{audio_dataset}_best_acc.pth")
     print('load model:', load_save_path)
-    # checkpoint_path = '/home/jingchen/clap-s/check-gunshot-few-shot/coil_gunshot_resampled_best_acc.pth'
     model.load_state_dict(torch.load(load_save_path, map_location=device))
     clap_support_plus(cfg, clap_model, cache_keys, cache_values, val_features, val_labels, test_features, test_labels, text_embeddings, log_file, model)
 

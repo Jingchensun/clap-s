@@ -39,10 +39,20 @@ pip install -r requirement.txt
   <img src="examples/train_367_Crackers.png" alt="audio sample: Crackers">
 </div>
 
-Download the outdoor gunshot fiber dataset from [Google Drive](https://drive.google.com/drive/folders/1P45O415eiUN_Emp1ENTRkB5wcw2wCRos?ths=true) and extract them
+Download the outdoor gunshot-firework fiber acoustic dataset from [Google Drive](https://drive.google.com/drive/folders/1P45O415eiUN_Emp1ENTRkB5wcw2wCRos?ths=true) and extract them to $data$ folder.
 ```bash
 tar -xvf coil_gunshot_resampled.tar.gz
 tar -xvf fiber_gunshot_resampled.tar.gz
+```
+The Final data structure should looks like:
+```
+data/
+|–– coil_gunshot_resampled/
+|–– coil_gunshot_resampled_train_labels.txt
+|–– coil_gunshot_resampled_test_labels.txt
+|–– fiber_gunshot_resampled/
+|–– fiber_gunshot_resampled_train_labels.txt
+|–– fiber_gunshot_resampled_test_labels.txt
 ```
 
 
