@@ -32,7 +32,7 @@ pip install -r requirement.txt
 ```
 
 ## 1 Dataset Preparation
-### Outdoor Fiber Acoustic Dataset
+The Gunshot-Firework dataset originates from the paper [Deep Learning-based Intrusion Detection and Impulsive Event Classification for Distributed Acoustic Sensing across Telecom Networks](https://ieeexplore.ieee.org/document/10530902). We have restructured and released this dataset to facilitate the reproduction of the results presented in the paper. Below are some sample mel spectrograms generated from the audio recordings in this dataset.
 
 <div style="text-align: center;">
   <!-- <p><a href="examples/train_367.wav">audio sample: Crackers</a></p> -->
@@ -41,8 +41,7 @@ pip install -r requirement.txt
 
 Download the outdoor gunshot-firework fiber acoustic dataset from [Google Drive](https://drive.google.com/drive/folders/1P45O415eiUN_Emp1ENTRkB5wcw2wCRos?ths=true) and extract them to $data$ folder.
 ```bash
-tar -xvf coil_gunshot.tar.gz
-tar -xvf fiber_gunshot.tar.gz
+tar -xvf gunshot_firework_data.tar.gz
 ```
 The Final data structure should looks like:
 ```
@@ -102,5 +101,13 @@ If you find this repository useful, please consider giving a star :star: and cit
   author={Sun, Jingchen and Han, Shaobo and Kohno, Wataru and Chen, Changyou},
   journal={arXiv preprint arXiv:2501.09877},
   year={2025}
+}
+
+@article{han2024deep,
+  title={Deep Learning-based Intrusion Detection and Impulsive Event Classification for Distributed Acoustic Sensing across Telecom Networks},
+  author={Han, Shaobo and Huang, Ming-Fang and Li, Tingfeng and Fang, Jian and Jiang, Zhuocheng and Wang, Ting},
+  journal={Journal of Lightwave Technology},
+  year={2024},
+  publisher={IEEE}
 }
 ```
