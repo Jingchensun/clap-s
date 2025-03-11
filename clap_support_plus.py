@@ -153,12 +153,12 @@ def clap_support_plus(cfg, clap_model, cache_keys, cache_values, val_features, v
         logit_scale = 33.3795
 
         val_features2 = model(val_features)
-        # Zero-shot CLIP
+        # Zero-shot CLAP
         clap_logits = logit_scale * val_features2 @ clap_weights
         y_preds = F.softmax(clap_logits.cpu(), dim=1).detach().numpy()
         y_labels = val_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
-        # log.write("\n**** Zero-shot CLIP's val accuracy: {:.2f}. ****\n".format(acc))
+        # log.write("\n**** Zero-shot CLAP's val accuracy: {:.2f}. ****\n".format(acc))
 
         # Tip-Adapter
         beta, alpha = cfg['init_beta'], cfg['init_alpha']
@@ -187,12 +187,12 @@ def clap_support_plus(cfg, clap_model, cache_keys, cache_values, val_features, v
 
         # log.write("\n-------- Evaluating on the test set. --------\n")
 
-        # Zero-shot CLIP
+        # Zero-shot CLAP
         clap_logits = logit_scale * test_features2 @ clap_weights
         y_preds = F.softmax(clap_logits.cpu(), dim=1).detach().numpy()
         y_labels = test_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
-        # log.write("\n**** Zero-shot CLIP's test accuracy: {:.2f}. ****\n".format(acc))
+        # log.write("\n**** Zero-shot CLAP's test accuracy: {:.2f}. ****\n".format(acc))
 
         # Tip-Adapter    
         

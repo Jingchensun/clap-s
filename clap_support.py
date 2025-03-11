@@ -141,13 +141,13 @@ def clap_support(cfg, clap_model, cache_keys, cache_values, val_features, val_la
         log.write("\n-------- Searching hyperparameters on the val set. --------\n")
         logit_scale = 33.3795
 
-        # Zero-shot CLIP
+        # Zero-shot CLAP
         clap_logits = logit_scale * val_features @ clap_weights
         y_preds = F.softmax(clap_logits.cpu(), dim=1).numpy()
         y_labels = val_labels.cpu().numpy()
         acc = accuracy_score(np.argmax(y_labels, axis=1), np.argmax(y_preds, axis=1))
 
-        # log.write("\n**** Zero-shot CLIP's val accuracy: {:.2f}. ****\n".format(acc))
+        # log.write("\n**** Zero-shot CLAP's val accuracy: {:.2f}. ****\n".format(acc))
 
         # CLAP-Support
         beta, alpha = cfg['init_beta'], cfg['init_alpha']
@@ -168,7 +168,7 @@ def clap_support(cfg, clap_model, cache_keys, cache_values, val_features, val_la
 
         log.write("\n-------- Evaluating on the test set. --------\n")
 
-        # Zero-shot CLIP
+        # Zero-shot CLAP
         clap_logits = logit_scale * test_features @ clap_weights
         y_preds = F.softmax(clap_logits.cpu(), dim=1).numpy()
         y_labels = test_labels.cpu().numpy()
