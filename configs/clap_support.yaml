@@ -11,8 +11,8 @@ search_hp: True
 # search_hp: False
 
 # best setting for fiber firework-gunshot dataset, CLAP-S
-search_scale: [1000, 10] 
-search_step: [100, 100]
+search_scale: [10, 10] 
+search_step: [100, 10]
 
 
 

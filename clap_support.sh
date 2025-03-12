@@ -1,11 +1,10 @@
 audio_dirs='
-fiber_gunshot
-coil_gunshot
+underwater_data
 '
 
 for audio_dir in $audio_dirs
 do
-    for seed in 1
+    for seed in 1 2 3
     do
         CUDA_VISIBLE_DEVICES=1 python clap_support.py \
             --root_path data \

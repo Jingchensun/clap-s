@@ -1,26 +1,18 @@
 import os
 import json
-import pandas as pd
 import torch
-from torch.utils.data import Dataset, DataLoader
-from tqdm import tqdm
-import torch.nn as nn
+from torch.utils.data import Dataset
 import numpy as np
-import pickle
 import torchaudio
 from collections import defaultdict
-# import random  # 导入random库
+from tqdm import tqdm
 
 # 定义类别字典
 classes = {
-    'Background': 0,
-    'Starter Gun': 1,
-    'Door Slam': 2,
-    'Car Alarm': 3,
-    'Crackers': 4,
-    'Cannon': 5,
-    'Fountain Cannon': 6,
-    'High Altitude Firework': 7
+    'diver_5knock': 1,
+    'diver_shake': 2,
+    'pnumetric_drill': 3,
+    'swazall_on_cable': 4
 }
 
 class AudioDataset(Dataset):
@@ -58,6 +50,9 @@ class Fiber(AudioDataset):
         self.shot = shot
         self.seed = seed
         self.targets, self.audio_paths = [], []
+                
+        # 显式赋值类列表
+        self.classes = list(classes.keys())  # 确保 `self.classes` 正确初始化
 
         if not os.path.exists(os.path.join(self.data_path, f"few-shot-json-seed{seed}")):
             os.makedirs(os.path.join(self.data_path, f"few-shot-json-seed{seed}"))
@@ -75,20 +70,42 @@ class Fiber(AudioDataset):
                 self._split_data(subset)
             self._save_to_json()
 
-        self.class_to_idx = classes
+        self.class_to_idx = {v: k for k, v in classes.items()}  # 反转 classes 映射，使 ID 对应类别名称
+
     def _load_meta(self):
-        """Load metadata from the pickle file or from text files if available."""
-        train_txt_file = os.path.join(self.data_path, self.audio_dir + '_train_labels.txt')
-        test_txt_file = os.path.join(self.data_path, self.audio_dir + '_test_labels.txt')
+        """Load metadata from the text files."""
+        train_txt_file = os.path.join(self.data_path, 'train.txt')
+        test_txt_file = os.path.join(self.data_path, 'test.txt')
 
         self._load_from_txt(train_txt_file, test_txt_file)
         print(f'Loaded labels from {train_txt_file} and {test_txt_file}')
 
     def _load_from_txt(self, train_txt_file, test_txt_file):
         """Load labels and classes from text files."""
-        self.target_train = np.loadtxt(train_txt_file, dtype=int, delimiter=',', skiprows=1, usecols=1).tolist()
-        self.target_test = np.loadtxt(test_txt_file, dtype=int, delimiter=',', skiprows=1, usecols=1).tolist()
-        self.classes = list(classes.keys())
+        self.target_train, self.audio_paths_train = [], []
+        self.target_test, self.audio_paths_test = [], []
+
+        # 解析 train.txt
+        if os.path.exists(train_txt_file):
+            with open(train_txt_file, 'r') as f:
+                for line in f:
+                    parts = line.strip().split(', ')
+                    if len(parts) == 3:
+                        audio_path, class_id, class_name = parts
+                        class_id = int(class_id)  # 转换为整数
+                        self.target_train.append(class_id)
+                        self.audio_paths_train.append(os.path.join(self.data_path, self.audio_dir, audio_path))
+
+        # 解析 test.txt（如果有）
+        if os.path.exists(test_txt_file):
+            with open(test_txt_file, 'r') as f:
+                for line in f:
+                    parts = line.strip().split(', ')
+                    if len(parts) == 3:
+                        audio_path, class_id, class_name = parts
+                        class_id = int(class_id)  # 转换为整数
+                        self.target_test.append(class_id)
+                        self.audio_paths_test.append(os.path.join(self.data_path, self.audio_dir, audio_path))
 
     def _split_train_val(self):
         """Split the train set into balanced train and val subsets."""
@@ -112,17 +129,15 @@ class Fiber(AudioDataset):
             selected_indices = val_indices
 
         for index in tqdm(selected_indices):
-            file_path = os.path.join(self.data_path, self.audio_dir, f'train_{index}.wav')
-            self.targets.append(self.classes[self.target_train[index]])
-            self.audio_paths.append(file_path)
+            self.targets.append(self.target_train[index])
+            self.audio_paths.append(self.audio_paths_train[index])
 
     def _split_data(self, subset):
-        """Split the dataset into train, val, and test subsets."""
+        """Split the dataset into test subset."""
         if subset == 'test':
             for index in tqdm(range(len(self.target_test))):
-                file_path = os.path.join(self.data_path, self.audio_dir, f'test_{index}.wav')
-                self.targets.append(self.classes[self.target_test[index]])
-                self.audio_paths.append(file_path)
+                self.targets.append(self.target_test[index])
+                self.audio_paths.append(self.audio_paths_test[index])
 
     def _apply_few_shot(self):
         """Apply few-shot sampling to the train set."""
@@ -137,7 +152,7 @@ class Fiber(AudioDataset):
         for class_id, samples in class_samples.items():
             samples.sort(key=lambda x: x[1])  # 按文件名升序排序
             selected_samples = samples[:self.shot]  # 选择前shot个样本
-            for index, file_path in selected_samples:
+            for _, file_path in selected_samples:
                 new_targets.append(class_id)
                 new_audio_paths.append(file_path)
 
@@ -166,10 +181,10 @@ class Fiber(AudioDataset):
         """Get the item at the given index."""
         file_path, target = self.audio_paths[index], self.targets[index]
         try:
-            idx = torch.tensor(self.class_to_idx[target])
+            class_idx = target - 1  # 类别 ID 转换为索引
+            one_hot_target = torch.zeros(len(self.class_to_idx)).scatter_(0, torch.tensor(class_idx), 1)
         except KeyError:
             raise KeyError(f"Target '{target}' not found in class_to_idx dictionary.")
-        one_hot_target = torch.zeros(len(self.class_to_idx)).scatter_(0, idx, 1).reshape(1, -1)
         return file_path, target, one_hot_target
 
     def __len__(self):
