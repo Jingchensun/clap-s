@@ -13,7 +13,7 @@ do
             --model_version 2023 \
             --use_cuda True \
             --seed "$seed" \
-            --shot '-1' \
+            --shot '3' \
             --save_path 'check-s' 
     done
 done
